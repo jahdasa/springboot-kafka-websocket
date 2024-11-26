@@ -35,7 +35,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
+    public void configureClientInboundChannel(final ChannelRegistration registration) {
         // Register the custom interceptor to intercept incoming messages
         registration.interceptors(customStompInterceptor);
     }

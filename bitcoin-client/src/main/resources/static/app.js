@@ -22,7 +22,7 @@ function connect() {
             if(IRT3TVAF0001)
                 isin_list.push('IRT3TVAF0001')
 
-            stompClient.subscribe('/user/topic/prices', function (message) {
+            stompClient.subscribe('/user/topic/price', function (message) {
 
                 const prices = JSON.parse(message.body);
 
@@ -87,7 +87,7 @@ $(function () {
             if(stompClientEnabled)
             {
                 const message = JSON.stringify({ isins: ['IRT3TVAF0001'] });
-                stompClient.send("/topic/prices/add-isins", {}, message)
+                stompClient.send("/user/topic/price/add-items", {}, message)
             }
 
         } else {
@@ -97,7 +97,7 @@ $(function () {
             if(stompClientEnabled)
             {
                 const message = JSON.stringify({ isins: ['IRT3TVAF0001'] });
-                stompClient.send("/topic/prices/remove-isins", {}, message)
+                stompClient.send("/user/topic/price/remove-items", {}, message)
             }
         }
     })
@@ -111,7 +111,7 @@ $(function () {
             if(stompClientEnabled)
             {
                 const message = JSON.stringify({ isins: ['IRO1FOLD0001'] });
-                stompClient.send("/topic/prices/add-isins", {}, message)
+                stompClient.send("/user/topic/price/add-items", {}, message)
             }
         } else {
             console.log('IRO1FOLD0001 checked')
@@ -121,7 +121,7 @@ $(function () {
             if(stompClientEnabled)
             {
                 const message = JSON.stringify({ isins: ['IRO1FOLD0001'] });
-                stompClient.send("/topic/prices/remove-isins", {}, message)
+                stompClient.send("/user/topic/price/remove-items", {}, message)
             }
         }
     })

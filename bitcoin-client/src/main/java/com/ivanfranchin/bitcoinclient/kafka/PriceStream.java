@@ -1,5 +1,6 @@
 package com.ivanfranchin.bitcoinclient.kafka;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +13,8 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -24,14 +26,16 @@ public class PriceStream {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
     public static final Map<String, PriceMessage> PRICES = new ConcurrentHashMap<>();
-    public static final Map<String, Map<String, Map<String, String>>> ISIN_SESSION_MAP = new ConcurrentHashMap<>();
 
-    static
+    private final ItemSelectorService itemSelectorService;
+
+    private ItemSelector priceSelector;
+
+    @PostConstruct
+    public void postConstruct()
     {
-        ISIN_SESSION_MAP.put("IRT3TVAF0001", new ConcurrentHashMap<>());
-        ISIN_SESSION_MAP.put("IRO1FOLD0001", new ConcurrentHashMap<>());
+        priceSelector = itemSelectorService.findSelectorOrNew("price");
     }
-
 
     @Bean
     public Consumer<Message<PriceMessage>> prices() {
@@ -49,7 +53,7 @@ public class PriceStream {
                 messageHeaders.get(IntegrationMessageHeaderAccessor.DELIVERY_ATTEMPT, AtomicInteger.class));
 
 
-            ISIN_SESSION_MAP.getOrDefault(priceMessage.isin(), Collections.emptyMap()).values().parallelStream()
+            priceSelector.getSessions(priceMessage.isin()).parallelStream()
                 .forEach(session ->
                 {
                     final String sessionId = session.get("sessionId");
@@ -57,14 +61,9 @@ public class PriceStream {
 
                     System.out.println("--> destination: /topic/prices, user: " + user + ", sessionId: " + sessionId);
 
-//                    simpMessagingTemplate.convertAndSend(
-//                            "/topic/prices",
-//                            priceMessage
-//                    );
-
                     simpMessagingTemplate.convertAndSendToUser(
                         sessionId,
-                        "/topic/prices",
+                        "/topic/price",
                         List.of(priceMessage),
                         createHeaders(sessionId));
                 });

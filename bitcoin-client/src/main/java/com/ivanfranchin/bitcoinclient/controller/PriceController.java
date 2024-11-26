@@ -2,96 +2,93 @@ package com.ivanfranchin.bitcoinclient.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ivanfranchin.bitcoinclient.kafka.ItemSelector;
+import com.ivanfranchin.bitcoinclient.kafka.ItemSelectorService;
 import com.ivanfranchin.bitcoinclient.kafka.PriceMessage;
 import com.ivanfranchin.bitcoinclient.kafka.PriceStream;
 import com.ivanfranchin.bitcoinclient.websocket.AddIsinMessage;
 import com.ivanfranchin.bitcoinclient.websocket.ChatMessage;
 import com.ivanfranchin.bitcoinclient.websocket.RemoveIsinMessage;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Controller
 public class PriceController {
 
+    private final ItemSelectorService itemSelectorService;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private final SimpMessagingTemplate simpMessagingTemplate;
+    private ItemSelector priceSelector;
+
+    @PostConstruct
+    public void postConstruct()
+    {
+        priceSelector = itemSelectorService.findSelectorOrNew("price");
+    }
 
     @GetMapping("/")
     public String getPrices() {
         return "prices";
     }
 
-    @MessageMapping("/chat")
-    public void addChatComment(@Payload ChatMessage chatMessage) {
-        if (chatMessage.toUser().isEmpty()) {
-            simpMessagingTemplate.convertAndSend("/topic/chat-messages", chatMessage);
-        } else {
-            simpMessagingTemplate.convertAndSendToUser(chatMessage.toUser(), "/topic/chat-messages", chatMessage);
-        }
-    }
-
-    @MessageMapping("/prices/add-isins")
-    public void addIsinFilter(
+    @MessageMapping("/price/add-items")
+    @SendToUser("/topic/price")
+    public List<PriceMessage> addIsinFilter(
         @Payload final AddIsinMessage message,
         final MessageHeaderAccessor accessor,
         @Header("simpSessionId") final String sessionId)
     {
         final String userName = ((StompHeaderAccessor) accessor).getUser().getName();
 
-        if (!message.isins().isEmpty())
+        final Map<String, String> session = new HashMap<>();
+        session.put("sessionId", sessionId);
+        session.put("user", userName);
+
+        final List<String> isins = message.isins();
+        if (!isins.isEmpty())
         {
-            message.isins().stream()
-                .forEach(isin ->
-                {
-                    final Map<String, Map<String, String>> sessionsMap = PriceStream.ISIN_SESSION_MAP.get(isin);
-
-                    final Map<String, String> session = new HashMap<>();
-                    session.put("sessionId", sessionId);
-                    session.put("user", userName);
-
-                    sessionsMap.put(sessionId, session);
-                });
+            priceSelector.select(sessionId, session, isins);
         }
+
+        return isins.stream()
+                .filter(isin -> PriceStream.PRICES.get(isin) != null)
+                .map(isin -> PriceStream.PRICES.get(isin))
+                .toList();
     }
 
-    @MessageMapping("/prices/remove-isins")
+    @MessageMapping("/price/remove-items")
     public void removeIsinFilter(
         @Payload final RemoveIsinMessage message,
         @Header("simpSessionId") final String sessionId)
     {
 
-        if (!message.isins().isEmpty())
+        final List<String> isins = message.isins();
+        if (!isins.isEmpty())
         {
-            message.isins().stream()
-                .forEach(isin ->
-                {
-                    final Map<String, Map<String, String>> sessionsMap = PriceStream.ISIN_SESSION_MAP.get(isin);
-
-                    sessionsMap.remove(sessionId);
-                });
+            priceSelector.unselect(sessionId, isins);
         }
     }
 
-    @SubscribeMapping("/prices")
+    @SubscribeMapping("/price")
     public List<PriceMessage> handleSubscription(
         final MessageHeaders headers,
         final MessageHeaderAccessor accessor,
@@ -107,18 +104,11 @@ public class PriceController {
         try {
             final List<String> isins = mapper.readValue(isinsHeader, List.class);
 
-            isins.stream()
-                .forEach(isin ->
-                {
-                    final Map<String, Map<String, String>> sessionsMap = PriceStream.ISIN_SESSION_MAP.get(isin);
+            final Map<String, String> session = new HashMap<>();
+            session.put("sessionId", sessionId);
+            session.put("user",userName);
 
-                    final Map<String, String> session = new HashMap<>();
-                    session.put("sessionId", sessionId);
-                    session.put("user",userName);
-
-                    sessionsMap.put(sessionId, session);
-                });
-
+            priceSelector.select(sessionId, session, isins);
 
             prices = isins.stream()
                     .filter(isin -> PriceStream.PRICES.get(isin) != null)
@@ -131,5 +121,13 @@ public class PriceController {
         }
 
         return prices;
+    }
+
+    private MessageHeaders createHeaders(String sessionId)
+    {
+        final SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+        headerAccessor.setSessionId(sessionId);
+        headerAccessor.setLeaveMutable(true);
+        return headerAccessor.getMessageHeaders();
     }
 }
