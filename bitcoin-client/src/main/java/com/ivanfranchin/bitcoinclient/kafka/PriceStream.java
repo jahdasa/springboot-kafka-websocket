@@ -65,7 +65,7 @@ public class PriceStream {
                     simpMessagingTemplate.convertAndSendToUser(
                         sessionId,
                         "/topic/prices",
-                        priceMessage,
+                        List.of(priceMessage),
                         createHeaders(sessionId));
                 });
 

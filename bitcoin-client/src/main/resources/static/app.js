@@ -5,8 +5,11 @@ let IRT3TVAF0001 = false;
 let IRO1FOLD0001 = false;
 
 function connect() {
-    const socket = new SockJS('/streamer')
-    stompClient = Stomp.over(socket)
+    // const socket = new SockJS('/streamer')
+    // stompClient = Stomp.over(socket)
+
+    stompClient = Stomp.client('ws://localhost:8080/streamer');
+
 
     let prevPriceValue = null
     stompClient.connect({},
@@ -19,26 +22,33 @@ function connect() {
             if(IRT3TVAF0001)
                 isin_list.push('IRT3TVAF0001')
 
-            stompClient.subscribe('/user/topic/prices', function (price) {
-                const priceBody = JSON.parse(price.body)
-                const isin = priceBody.isin
-                const priceValue = priceBody.value
-                const priceTimestamp = priceBody.timestamp
+            stompClient.subscribe('/user/topic/prices', function (message) {
 
-                if (prevPriceValue == null) {
-                    prevPriceValue = priceValue
-                }
-                const priceVar = priceValue - prevPriceValue
-                prevPriceValue = priceValue
+                const prices = JSON.parse(message.body);
 
-                $('#currentPrice').text(Number(priceValue).toFixed(2))
-                $('#variation').text((priceVar > 0 ? "+" : "") + Number(priceVar).toFixed(2))
+                 prices.forEach(function(price){
+                     console.log(price);
 
-                const row = '<tr><td>'+isin+'</td><td>'+Number(priceValue).toFixed(2)+'</td><td>'+moment(priceTimestamp).format('YYYY-MM-DD HH:mm:ss')+'</td></tr>'
-                if ($('#priceList tr').length > 20) {
-                    $('#priceList tr:last').remove()
-                }
-                $('#priceList').find('tbody').prepend(row)
+                     // const priceBody = JSON.parse(price.body)
+                     const isin = price.isin
+                     const priceValue = price.value
+                     const priceTimestamp = price.timestamp
+
+                     if (prevPriceValue == null) {
+                         prevPriceValue = priceValue
+                     }
+                     const priceVar = priceValue - prevPriceValue
+                     prevPriceValue = priceValue
+
+                     $('#currentPrice').text(Number(priceValue).toFixed(2))
+                     $('#variation').text((priceVar > 0 ? "+" : "") + Number(priceVar).toFixed(2))
+
+                     const row = '<tr><td>'+isin+'</td><td>'+Number(priceValue).toFixed(2)+'</td><td>'+moment(priceTimestamp).format('YYYY-MM-DD HH:mm:ss')+'</td></tr>'
+                     if ($('#priceList tr').length > 20) {
+                         $('#priceList tr:last').remove()
+                     }
+                     $('#priceList').find('tbody').prepend(row)
+                 });
             },
             {
                 isins: JSON.stringify(isin_list)           // Header with the first parameter
