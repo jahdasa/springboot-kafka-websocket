@@ -1,7 +1,7 @@
 services:
 
   mysql:
-    image: mysql:8.3.0
+    image: docker.mofid.dev/docker.io/mysql:8.3.0
     container_name: mysql
     restart: unless-stopped
     ports:
@@ -13,7 +13,7 @@ services:
       test: "mysqladmin ping -u root -p$${MYSQL_ROOT_PASSWORD}"
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.3
+    image: docker.mofid.dev/docker.io/confluentinc/cp-zookeeper:7.5.3
     container_name: zookeeper
     restart: unless-stopped
     ports:
@@ -24,7 +24,7 @@ services:
       test: "echo stat | nc localhost $$ZOOKEEPER_CLIENT_PORT"
 
   kafka:
-    image: confluentinc/cp-kafka:7.5.3
+    image: docker.mofid.dev/docker.io/confluentinc/cp-kafka:7.5.3
     container_name: kafka
     restart: unless-stopped
     depends_on:
@@ -40,7 +40,7 @@ services:
       test: [ "CMD", "nc", "-z", "localhost", "9092" ]
 
   kafdrop:
-    image: obsidiandynamics/kafdrop:4.0.1
+    image: docker.mofid.dev/docker.io/obsidiandynamics/kafdrop:4.0.1
     container_name: kafdrop
     restart: unless-stopped
     depends_on:

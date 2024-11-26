@@ -1,7 +1,11 @@
 let stompClient = null;
 
+let stompClientEnabled = false;
+let IRT3TVAF0001 = false;
+let IRO1FOLD0001 = false;
+
 function connect() {
-    const socket = new SockJS('/websocket')
+    const socket = new SockJS('/streamer')
     stompClient = Stomp.over(socket)
 
     let prevPriceValue = null
@@ -9,8 +13,15 @@ function connect() {
         function (frame) {
             console.log('Connected: ' + frame)
 
-            stompClient.subscribe('/topic/prices', function (price) {
+            let isin_list = [];
+            if(IRO1FOLD0001)
+                isin_list.push('IRO1FOLD0001')
+            if(IRT3TVAF0001)
+                isin_list.push('IRT3TVAF0001')
+
+            stompClient.subscribe('/user/topic/prices', function (price) {
                 const priceBody = JSON.parse(price.body)
+                const isin = priceBody.isin
                 const priceValue = priceBody.value
                 const priceTimestamp = priceBody.timestamp
 
@@ -23,31 +34,14 @@ function connect() {
                 $('#currentPrice').text(Number(priceValue).toFixed(2))
                 $('#variation').text((priceVar > 0 ? "+" : "") + Number(priceVar).toFixed(2))
 
-                const row = '<tr><td>'+Number(priceValue).toFixed(2)+'</td><td>'+moment(priceTimestamp).format('YYYY-MM-DD HH:mm:ss')+'</td></tr>'
+                const row = '<tr><td>'+isin+'</td><td>'+Number(priceValue).toFixed(2)+'</td><td>'+moment(priceTimestamp).format('YYYY-MM-DD HH:mm:ss')+'</td></tr>'
                 if ($('#priceList tr').length > 20) {
                     $('#priceList tr:last').remove()
                 }
                 $('#priceList').find('tbody').prepend(row)
-            })
-
-            stompClient.subscribe('/topic/chat-messages', function (chatMessage) {
-                const chatMessageBody = JSON.parse(chatMessage.body)
-                const fromUser = chatMessageBody.fromUser
-                const comment = chatMessageBody.comment
-                const timestamp = chatMessageBody.timestamp
-
-                const row = '<tr><td>['+moment(timestamp).format('YYYY-MM-DD HH:mm:ss')+'] '+fromUser+' to all: '+comment+'</td></tr>'
-                $('#chat').find('tbody').prepend(row)
-            })
-
-            stompClient.subscribe('/user/topic/chat-messages', function (chatMessage) {
-                const chatMessageBody = JSON.parse(chatMessage.body)
-                const fromUser = chatMessageBody.fromUser
-                const comment = chatMessageBody.comment
-                const timestamp = chatMessageBody.timestamp
-
-                const row = '<tr><td>['+moment(timestamp).format('YYYY-MM-DD HH:mm:ss')+'] '+fromUser+' to you: '+comment+'</td></tr>'
-                $('#chat').find('tbody').prepend(row)
+            },
+            {
+                isins: JSON.stringify(isin_list)           // Header with the first parameter
             })
         },
         function() {
@@ -68,8 +62,57 @@ $(function () {
     $('#websocketSwitch').click(function() {
         if ($(this).prop('checked')) {
             connect()
+            stompClientEnabled = true;
         } else {
             disconnect()
+            stompClientEnabled = false;
+        }
+    })
+
+    $('#IRT3TVAF0001').click(function() {
+        if ($(this).prop('checked')) {
+            console.log('IRT3TVAF0001 checked')
+            IRT3TVAF0001 = true;
+
+            if(stompClientEnabled)
+            {
+                const message = JSON.stringify({ isins: ['IRT3TVAF0001'] });
+                stompClient.send("/topic/prices/add-isins", {}, message)
+            }
+
+        } else {
+            console.log('IRT3TVAF0001 unchecked')
+            IRT3TVAF0001 = false;
+
+            if(stompClientEnabled)
+            {
+                const message = JSON.stringify({ isins: ['IRT3TVAF0001'] });
+                stompClient.send("/topic/prices/remove-isins", {}, message)
+            }
+        }
+    })
+
+    $('#IRO1FOLD0001').click(function() {
+        if ($(this).prop('checked')) {
+            console.log('IRO1FOLD0001 checked')
+
+            IRO1FOLD0001 = true;
+
+            if(stompClientEnabled)
+            {
+                const message = JSON.stringify({ isins: ['IRO1FOLD0001'] });
+                stompClient.send("/topic/prices/add-isins", {}, message)
+            }
+        } else {
+            console.log('IRO1FOLD0001 checked')
+
+            IRO1FOLD0001 = false;
+
+            if(stompClientEnabled)
+            {
+                const message = JSON.stringify({ isins: ['IRO1FOLD0001'] });
+                stompClient.send("/topic/prices/remove-isins", {}, message)
+            }
         }
     })
 
@@ -95,5 +138,5 @@ $(function () {
     height = window.innerHeight - 500
     $('#chat').parent().css({"height": height, "max-height": height, "overflow-y": "auto"})
 
-    connect()
+    // connect()
 })

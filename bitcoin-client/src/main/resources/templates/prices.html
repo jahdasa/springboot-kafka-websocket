@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Bitcoin-Client</title>
+    <title>Streamer-Client</title>
     <!--Import Google Icon Font-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <!--Import materialize.css-->
@@ -25,10 +25,10 @@
         <div class="row">
             <div class="col s6">
                 <div class="row">
-                    <div class="col s8">
-                        <span class="light-blue-text text-darken-3" id="currentPrice" style="font-size: 40px; margin-right: 10px;">____.__</span>
-                        <span class="light-blue-text text-darken-3" id="variation" style="font-size: 20px;">__</span>
-                    </div>
+<!--                    <div class="col s8">-->
+<!--                        <span class="light-blue-text text-darken-3" id="currentPrice" style="font-size: 40px; margin-right: 10px;">____.__</span>-->
+<!--                        <span class="light-blue-text text-darken-3" id="variation" style="font-size: 20px;">__</span>-->
+<!--                    </div>-->
 
                     <!-- Websocket Connection -->
                     <div class="col s4">
@@ -36,7 +36,31 @@
                         <div class="switch">
                             <label>
                                 Off
-                                <input id="websocketSwitch" type="checkbox" checked>
+                                <input id="websocketSwitch" type="checkbox">
+                                <span class="lever"></span>
+                                On
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col s4">
+                        <label>IRT3TVAF0001</label>
+                        <div class="switch">
+                            <label>
+                                Off
+                                <input id="IRT3TVAF0001" type="checkbox">
+                                <span class="lever"></span>
+                                On
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col s4">
+                        <label>IRO1FOLD0001</label>
+                        <div class="switch">
+                            <label>
+                                Off
+                                <input id="IRO1FOLD0001" type="checkbox">
                                 <span class="lever"></span>
                                 On
                             </label>
@@ -52,7 +76,7 @@
                 </div>
             </div>
 
-            <div class="col s6">
+            <!--<div class="col s6">
                 <h5 class="center-align orange lighten-4">Chat</h5>
                 <div class="row">
                     <form id="chatForm" class="col s12">
@@ -88,7 +112,7 @@
                         </table>
                     </div>
                 </div>
-            </div>
+            </div>-->
         </div>
     </div>
 </main>

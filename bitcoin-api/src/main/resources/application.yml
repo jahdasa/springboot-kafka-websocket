@@ -30,3 +30,6 @@ springdoc:
   swagger-ui:
     groups-order: DESC
     disable-swagger-default-url: true
+
+server:
+  port: 9090

@@ -22,7 +22,7 @@ public class PriceScheduler {
     private final PriceService priceService;
     private final PriceStreamer priceStreamer;
 
-    @Scheduled(cron = "*/5 * * * * *") // every 5 seconds
+    @Scheduled(cron = "*/2 * * * * *") // every 2 seconds
     public void streamNewPrice() {
         if (hasTrade()) {
             Price price = priceService.getLastPrice();
