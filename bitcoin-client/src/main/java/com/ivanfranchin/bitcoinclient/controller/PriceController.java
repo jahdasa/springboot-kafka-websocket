@@ -44,9 +44,9 @@ public class PriceController {
         return "prices";
     }
 
-    @MessageMapping("/price/add-items")
+    @MessageMapping("/price/add-filter")
     @SendToUser("/topic/price")
-    public List<PriceMessage> addIsinFilter(
+    public List<PriceMessage> addFilter(
         @Payload final AddIsinMessage message,
         final MessageHeaderAccessor accessor,
         @Header("simpSessionId") final String sessionId)
@@ -69,8 +69,8 @@ public class PriceController {
         return Collections.emptyList();
     }
 
-    @MessageMapping("/price/remove-items")
-    public void removeIsinFilter(
+    @MessageMapping("/price/remove-filter")
+    public void removeFilter(
         @Payload final RemoveIsinMessage message,
         @Header("simpSessionId") final String sessionId)
     {

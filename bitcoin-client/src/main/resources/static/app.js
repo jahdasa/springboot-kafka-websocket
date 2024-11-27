@@ -177,7 +177,7 @@ $(function () {
             if(stompClientEnabled)
             {
                 const message = JSON.stringify({ isins: ['IRT3TVAF0001'] });
-                stompClient.send("/user/topic/price/add-items", {}, message)
+                stompClient.send("/user/topic/price/add-filter", {}, message)
             }
 
         } else {
@@ -187,7 +187,7 @@ $(function () {
             if(stompClientEnabled)
             {
                 const message = JSON.stringify({ isins: ['IRT3TVAF0001'] });
-                stompClient.send("/user/topic/price/remove-items", {}, message)
+                stompClient.send("/user/topic/price/remove-filter", {}, message)
             }
         }
     })
@@ -201,7 +201,7 @@ $(function () {
             if(stompClientEnabled)
             {
                 const message = JSON.stringify({ isins: ['IRO1FOLD0001'] });
-                stompClient.send("/user/topic/price/add-items", {}, message)
+                stompClient.send("/user/topic/price/add-filter", {}, message)
             }
         } else {
             console.log('IRO1FOLD0001 checked')
@@ -211,7 +211,7 @@ $(function () {
             if(stompClientEnabled)
             {
                 const message = JSON.stringify({ isins: ['IRO1FOLD0001'] });
-                stompClient.send("/user/topic/price/remove-items", {}, message)
+                stompClient.send("/user/topic/price/remove-filter", {}, message)
             }
         }
     })
@@ -225,7 +225,7 @@ $(function () {
             if(stompClientEnabledTransaction)
             {
                 const message = JSON.stringify({ isins: ['IRT3TVAF0001'] });
-                stompClientTransaction.send("/user/topic/transaction/add-items", {}, message)
+                stompClientTransaction.send("/user/topic/transaction/add-filter", {}, message)
             }
 
         } else {
@@ -235,7 +235,7 @@ $(function () {
             if(stompClientEnabledTransaction)
             {
                 const message = JSON.stringify({ isins: ['IRT3TVAF0001'] });
-                stompClientTransaction.send("/user/topic/transaction/remove-items", {}, message)
+                stompClientTransaction.send("/user/topic/transaction/remove-filter", {}, message)
             }
         }
     })
@@ -249,7 +249,7 @@ $(function () {
             if(stompClientEnabledTransaction)
             {
                 const message = JSON.stringify({ isins: ['IRO1FOLD0001'] });
-                stompClientTransaction.send("/user/topic/transaction/add-items", {}, message)
+                stompClientTransaction.send("/user/topic/transaction/add-filter", {}, message)
             }
         } else {
             console.log('IRO1FOLD0001 Transaction checked')
@@ -259,7 +259,7 @@ $(function () {
             if(stompClientEnabledTransaction)
             {
                 const message = JSON.stringify({ isins: ['IRO1FOLD0001'] });
-                stompClientTransaction.send("/user/topic/transaction/remove-items", {}, message)
+                stompClientTransaction.send("/user/topic/transaction/remove-filter", {}, message)
             }
         }
     })
@@ -273,7 +273,7 @@ $(function () {
             if(stompClientEnabledTransaction)
             {
                 const message = JSON.stringify({ portfolioIds: [1271] });
-                stompClientTransaction.send("/user/topic/transaction/add-items", {}, message)
+                stompClientTransaction.send("/user/topic/transaction/add-filter", {}, message)
             }
 
         } else {
@@ -283,7 +283,7 @@ $(function () {
             if(stompClientEnabledTransaction)
             {
                 const message = JSON.stringify({  portfolioIds: [1271] });
-                stompClientTransaction.send("/user/topic/transaction/remove-items", {}, message)
+                stompClientTransaction.send("/user/topic/transaction/remove-filter", {}, message)
             }
         }
     })
@@ -296,7 +296,7 @@ $(function () {
             if(stompClientEnabledTransaction)
             {
                 const message = JSON.stringify({ portfolioIds: [1270] });
-                stompClientTransaction.send("/user/topic/transaction/add-items", {}, message)
+                stompClientTransaction.send("/user/topic/transaction/add-filter", {}, message)
             }
 
         } else {
@@ -306,7 +306,7 @@ $(function () {
             if(stompClientEnabledTransaction)
             {
                 const message = JSON.stringify({  portfolioIds: [1270] });
-                stompClientTransaction.send("/user/topic/transaction/remove-items", {}, message)
+                stompClientTransaction.send("/user/topic/transaction/remove-filter", {}, message)
             }
         }
     })
@@ -320,7 +320,7 @@ $(function () {
             if(stompClientEnabledTransaction)
             {
                 const message = JSON.stringify({ types: ['BUY'] });
-                stompClientTransaction.send("/user/topic/transaction/add-items", {}, message)
+                stompClientTransaction.send("/user/topic/transaction/add-filter", {}, message)
             }
 
         } else {
@@ -330,7 +330,7 @@ $(function () {
             if(stompClientEnabledTransaction)
             {
                 const message = JSON.stringify({ types: ['BUY'] });
-                stompClientTransaction.send("/user/topic/transaction/remove-items", {}, message)
+                stompClientTransaction.send("/user/topic/transaction/remove-filter", {}, message)
             }
         }
     })
@@ -343,7 +343,7 @@ $(function () {
             if(stompClientEnabledTransaction)
             {
                 const message = JSON.stringify({ types: ['SELL'] });
-                stompClientTransaction.send("/user/topic/transaction/add-items", {}, message)
+                stompClientTransaction.send("/user/topic/transaction/add-filter", {}, message)
             }
 
         } else {
@@ -353,7 +353,7 @@ $(function () {
             if(stompClientEnabledTransaction)
             {
                 const message = JSON.stringify({ types: ['SELL'] });
-                stompClientTransaction.send("/user/topic/transaction/remove-items", {}, message)
+                stompClientTransaction.send("/user/topic/transaction/remove-filter", {}, message)
             }
         }
     })

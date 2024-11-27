@@ -3,7 +3,6 @@ package com.ivanfranchin.bitcoinclient.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ivanfranchin.bitcoinclient.kafka.transaction.TransactionMessage;
-import com.ivanfranchin.bitcoinclient.kafka.transaction.TransactionStream;
 import com.ivanfranchin.bitcoinclient.selector.ItemSelector;
 import com.ivanfranchin.bitcoinclient.selector.ItemSelectorService;
 import com.ivanfranchin.bitcoinclient.selector.SelectorFilter;
@@ -15,8 +14,6 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -41,9 +38,9 @@ public class TransactionController {
         transactionSelector = itemSelectorService.findSelectorOrNew("transaction", TransactionMessage::portfolioId);
     }
 
-    @MessageMapping("/transaction/add-items")
+    @MessageMapping("/transaction/add-filter")
     @SendToUser("/topic/transaction")
-    public List<TransactionMessage> addIsinFilter(
+    public List<TransactionMessage> addFilter(
         @Payload final AddPortfolioIdMessage message,
         final MessageHeaderAccessor accessor,
         @Header("simpSessionId") final String sessionId)
@@ -68,8 +65,8 @@ public class TransactionController {
         return Collections.emptyList();
     }
 
-    @MessageMapping("/transaction/remove-items")
-    public void removeIsinFilter(
+    @MessageMapping("/transaction/remove-filter")
+    public void removeFilter(
         @Payload final RemovePortfolioIdMessage message,
         @Header("simpSessionId") final String sessionId)
     {
