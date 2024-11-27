@@ -16,6 +16,8 @@ spring:
       bindings:
         prices-out-0:
           destination: com.ivanfranchin.bitcoin.api.price
+        transaction-out-0:
+          destination: com.ivanfranchin.bitcoin.api.transaction
 
 management:
   endpoints:

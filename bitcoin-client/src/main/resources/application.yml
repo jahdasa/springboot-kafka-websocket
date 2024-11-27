@@ -10,6 +10,11 @@ spring:
         prices-in-0:
           destination: com.ivanfranchin.bitcoin.api.price
           group: bitcoinClientGroup
+        transaction-in-0:
+          destination: com.ivanfranchin.bitcoin.api.transaction
+          group: bitcoinClientGroup
+    function:
+      definition: transaction;prices
 
 management:
   endpoints:

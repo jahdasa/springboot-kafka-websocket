@@ -1,6 +1,6 @@
 package com.ivanfranchin.bitcoinclient.websocket;
 
-import com.ivanfranchin.bitcoinclient.kafka.ItemSelectorService;
+import com.ivanfranchin.bitcoinclient.selector.ItemSelectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

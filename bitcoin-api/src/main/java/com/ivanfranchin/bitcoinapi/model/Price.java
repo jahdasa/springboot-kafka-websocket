@@ -23,13 +23,17 @@ public class Price {
     private Long id;
 
     @Column(nullable = false)
+    private String isin;
+
+    @Column(nullable = false)
     private BigDecimal value;
 
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
-    public Price(BigDecimal value, LocalDateTime timestamp) {
+    public Price(BigDecimal value, String isin, LocalDateTime timestamp) {
         this.value = value;
+        this.isin = isin;
         this.timestamp = timestamp;
     }
 }

@@ -4,7 +4,7 @@ import com.ivanfranchin.bitcoinapi.model.Price;
 
 public interface PriceService {
 
-    Price getLastPrice();
+    Price getLastPrice(String isin);
 
     Price savePrice(Price price);
 }

@@ -12,8 +12,8 @@ public class PriceServiceImpl implements PriceService {
     private final PriceRepository priceRepository;
 
     @Override
-    public Price getLastPrice() {
-        return priceRepository.findTopByOrderByTimestampDesc();
+    public Price getLastPrice(String isin) {
+        return priceRepository.findTopByIsinOrderByTimestampDesc(isin);
     }
 
     @Override

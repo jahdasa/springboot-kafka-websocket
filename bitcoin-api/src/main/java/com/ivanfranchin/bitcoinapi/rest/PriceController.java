@@ -19,7 +19,7 @@ public class PriceController {
     @Operation(summary = "Get last price")
     @GetMapping("/last")
     public PriceResponse getLastPrice() {
-        Price price = priceService.getLastPrice();
+        Price price = priceService.getLastPrice("IRO1FOLD0001");
         return new PriceResponse(price.getValue(), price.getTimestamp());
     }
 }

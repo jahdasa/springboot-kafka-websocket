@@ -1,9 +1,12 @@
-package com.ivanfranchin.bitcoinclient.kafka;
+package com.ivanfranchin.bitcoinclient.kafka.price;
 
+import com.ivanfranchin.bitcoinclient.selector.ItemSelector;
+import com.ivanfranchin.bitcoinclient.selector.ItemSelectorService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.IntegrationMessageHeaderAccessor;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
@@ -22,6 +25,7 @@ import java.util.function.Consumer;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@Configuration
 public class PriceStream {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -29,7 +33,7 @@ public class PriceStream {
 
     private final ItemSelectorService itemSelectorService;
 
-    private ItemSelector priceSelector;
+    private ItemSelector<String> priceSelector;
 
     @PostConstruct
     public void postConstruct()
@@ -56,8 +60,8 @@ public class PriceStream {
             priceSelector.getSessions(priceMessage.isin()).parallelStream()
                 .forEach(session ->
                 {
-                    final String sessionId = session.get("sessionId");
-                    final String user = session.get("user");
+                    final String sessionId = (String) session.get("sessionId");
+                    final String user = (String) session.get("user");
 
                     System.out.println("--> destination: /topic/prices, user: " + user + ", sessionId: " + sessionId);
 
@@ -78,5 +82,4 @@ public class PriceStream {
         headerAccessor.setLeaveMutable(true);
         return headerAccessor.getMessageHeaders();
     }
-
 }
