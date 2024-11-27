@@ -10,7 +10,7 @@ public class ItemSelectorService
 {
     private final Map<String, ItemSelector> selectors = new ConcurrentHashMap<>();
 
-    public ItemSelector findSelectorOrNew(final String selector, final String... items)
+    public ItemSelector findSelectorOrNew(final String selector)
     {
         if(selectors.containsKey(selector))
         {
@@ -18,7 +18,7 @@ public class ItemSelectorService
         }
         else
         {
-            final ItemSelector itemSelector = new ItemSelector(items);
+            final ItemSelector itemSelector = new ItemSelector();
             selectors.put(selector, itemSelector);
 
             return itemSelector;

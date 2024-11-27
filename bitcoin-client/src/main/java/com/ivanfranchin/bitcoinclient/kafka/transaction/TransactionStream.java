@@ -16,8 +16,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -27,11 +25,9 @@ import java.util.function.Consumer;
 public class TransactionStream {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
-    public static final Map<String, TransactionMessage> TRANSACTIONS = new ConcurrentHashMap<>();
-
     private final ItemSelectorService itemSelectorService;
 
-    private ItemSelector<Long> portfolioSelector;
+    private ItemSelector<Long, TransactionMessage> portfolioSelector;
 
     @PostConstruct
     public void postConstruct()
@@ -81,7 +77,7 @@ public class TransactionStream {
 
                 });
 
-            TRANSACTIONS.put(transactionMessage.isin(), transactionMessage);
+            portfolioSelector.putData(transactionMessage.portfolioId(), transactionMessage);
         };
     }
 

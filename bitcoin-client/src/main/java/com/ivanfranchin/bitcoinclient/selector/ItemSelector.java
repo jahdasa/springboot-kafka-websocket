@@ -1,12 +1,16 @@
 package com.ivanfranchin.bitcoinclient.selector;
 
+import com.ivanfranchin.bitcoinclient.kafka.transaction.TransactionMessage;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ItemSelector<T>
+public class ItemSelector<T, U>
 {
     private final Map<T, Map<String, SelectorFilter>> ITEM_SESSION_MAP = new ConcurrentHashMap<>();
     private final Map<String, SelectorFilter> SESSION_MAP = new ConcurrentHashMap<>();
+
+    public final Map<T, U> data = new ConcurrentHashMap<>();
 
     public ItemSelector(final T... items)
     {
@@ -99,5 +103,20 @@ public class ItemSelector<T>
 
             return selectorFilter;
         }
+    }
+
+    public void putData(final T key, final U value)
+    {
+        data.put(key, value);
+    }
+
+    public U getData(final T key)
+    {
+        return data.get(key);
+    }
+
+    public U getData(final T key, final U defaultValue)
+    {
+        return data.getOrDefault(key, defaultValue);
     }
 }

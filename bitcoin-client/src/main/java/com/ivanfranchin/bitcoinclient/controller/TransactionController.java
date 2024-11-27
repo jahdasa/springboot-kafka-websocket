@@ -33,7 +33,7 @@ public class TransactionController {
     private final ItemSelectorService itemSelectorService;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private ItemSelector<Long> transactionSelector;
+    private ItemSelector<Long, TransactionMessage> transactionSelector;
 
     @PostConstruct
     public void postConstruct()
@@ -63,8 +63,8 @@ public class TransactionController {
             transactionSelector.select(sessionId, filter);
 
             return  message.portfolioIds().stream()
-                    .filter(portfolioId -> TransactionStream.TRANSACTIONS.get(portfolioId) != null)
-                    .map(portfolioId -> TransactionStream.TRANSACTIONS.get(portfolioId))
+                    .filter(portfolioId -> transactionSelector.getData(portfolioId) != null)
+                    .map(portfolioId -> transactionSelector.getData(portfolioId))
                     .filter(transaction -> filter.apply(transaction))
                     .toList();
         }
@@ -123,8 +123,8 @@ public class TransactionController {
             transactionSelector.select(sessionId, filter);
 
             transactions = portfolioIds.stream()
-                    .filter(portfolioId -> TransactionStream.TRANSACTIONS.get(portfolioId) != null)
-                    .map(portfolioId -> TransactionStream.TRANSACTIONS.get(portfolioId))
+                    .filter(portfolioId -> transactionSelector.getData(portfolioId) != null)
+                    .map(portfolioId -> transactionSelector.getData(portfolioId))
                     .filter(transaction -> filter.apply(transaction))
                     .toList();
 

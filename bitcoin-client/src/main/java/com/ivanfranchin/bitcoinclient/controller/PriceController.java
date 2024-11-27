@@ -34,7 +34,7 @@ public class PriceController {
     private final ItemSelectorService itemSelectorService;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private ItemSelector<String> priceSelector;
+    private ItemSelector<String, PriceMessage> priceSelector;
 
     @PostConstruct
     public void postConstruct()
@@ -67,8 +67,8 @@ public class PriceController {
             priceSelector.select(sessionId, filter);
 
             return isins.stream()
-                    .filter(isin -> PriceStream.PRICES.get(isin) != null)
-                    .map(isin -> PriceStream.PRICES.get(isin))
+                    .filter(isin -> priceSelector.getData(isin) != null)
+                    .map(isin -> priceSelector.getData(isin))
                     .filter(price -> filter.apply(price))
                     .toList();
         }
@@ -117,8 +117,8 @@ public class PriceController {
             priceSelector.select(sessionId, filter);
 
             prices = isins.stream()
-                    .filter(isin -> PriceStream.PRICES.get(isin) != null)
-                    .map(isin -> PriceStream.PRICES.get(isin))
+                    .filter(isin -> priceSelector.getData(isin) != null)
+                    .map(isin -> priceSelector.getData(isin))
                     .filter(price -> filter.apply(price))
                     .toList();
 

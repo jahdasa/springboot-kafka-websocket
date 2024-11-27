@@ -33,7 +33,7 @@ public class PriceStream {
 
     private final ItemSelectorService itemSelectorService;
 
-    private ItemSelector<String> priceSelector;
+    private ItemSelector<String, PriceMessage> priceSelector;
 
     @PostConstruct
     public void postConstruct()
