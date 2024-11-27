@@ -53,7 +53,7 @@ public class TransactionController {
         final SelectorFilter filter = transactionSelector.getFilterOrNew(sessionId);
         filter.putMetadata("username", username);
 
-        filter.putKeyValue(message.portfolioIds(), TransactionMessage::portfolioId);
+        filter.putKeyValue(message.portfolioIds());
 
         filter.putFieldValue("types", message.types(), TransactionMessage::type);
         filter.putFieldValue("isins", message.isins(), TransactionMessage::isin);
@@ -111,7 +111,7 @@ public class TransactionController {
             final SelectorFilter filter = transactionSelector.getFilterOrNew(sessionId);
             filter.putMetadata("username", username);
 
-            filter.putKeyValue(portfolioIds, TransactionMessage::portfolioId);
+            filter.putKeyValue(portfolioIds);
 
             filter.putFieldValue("types", types, TransactionMessage::type);
             filter.putFieldValue("isins", isins, TransactionMessage::isin);

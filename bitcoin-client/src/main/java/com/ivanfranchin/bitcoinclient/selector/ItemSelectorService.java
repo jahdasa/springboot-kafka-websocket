@@ -19,9 +19,7 @@ public class ItemSelectorService
         }
         else
         {
-            final ItemSelector<T,U> itemSelector = new ItemSelector<>();
-            itemSelector.setKeyMapper(mapper);
-
+            final ItemSelector<T,U> itemSelector = new ItemSelector<>(mapper);
             selectors.put(selector, itemSelector);
 
 

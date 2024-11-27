@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ivanfranchin.bitcoinclient.selector.ItemSelector;
 import com.ivanfranchin.bitcoinclient.selector.ItemSelectorService;
 import com.ivanfranchin.bitcoinclient.kafka.price.PriceMessage;
-import com.ivanfranchin.bitcoinclient.kafka.price.PriceStream;
 import com.ivanfranchin.bitcoinclient.selector.SelectorFilter;
 import com.ivanfranchin.bitcoinclient.websocket.AddIsinMessage;
 import com.ivanfranchin.bitcoinclient.websocket.RemoveIsinMessage;
@@ -15,8 +14,6 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -59,7 +56,7 @@ public class PriceController {
         final SelectorFilter filter = priceSelector.getFilterOrNew(sessionId);
         filter.putMetadata("username", username);
 
-        filter.putKeyValue(message.isins(), PriceMessage::isin);
+        filter.putKeyValue(message.isins());
 
         final List<String> isins = message.isins();
         if (!isins.isEmpty())
@@ -108,7 +105,7 @@ public class PriceController {
             final SelectorFilter filter = priceSelector.getFilterOrNew(sessionId);
             filter.putMetadata("username", username);
 
-            filter.putKeyValue(isins, PriceMessage::isin);
+            filter.putKeyValue(isins);
 
             priceSelector.select(sessionId, filter);
 

@@ -15,15 +15,16 @@ public class SelectorFilter
     private Map<String, Object> fieldMappers = new ConcurrentHashMap<>();
 
     private Object keyValues = new ConcurrentHashMap<>();
-    private Object keyMapper = Function.identity();
+    private Object keyMapper;
 
     private Object latestRemovedKeyValues = List.of();
 
 
-    public SelectorFilter(final String sessionId)
+    public SelectorFilter(final String sessionId, final Object keyMapper)
     {
         metadata.put("sessionId", sessionId);
         this.sessionId = sessionId;
+        this.keyMapper = keyMapper;
     }
 
     public String getSessionId()
@@ -41,10 +42,8 @@ public class SelectorFilter
         return metadata.get(key);
     }
 
-    public <T, U> void putKeyValue(final List<T> values, final Function<U, T> mapper)
+    public <T, U> void putKeyValue(final List<T> values)
     {
-        keyMapper = mapper;
-
         if(keyValues == null)
         {
             keyValues = new ConcurrentHashMap<T,T>();

@@ -1,7 +1,5 @@
 package com.ivanfranchin.bitcoinclient.selector;
 
-import com.ivanfranchin.bitcoinclient.kafka.transaction.TransactionMessage;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -14,6 +12,11 @@ public class ItemSelector<T, U>
     private Function<U, T> keyMapper;
 
     public final Map<T, U> data = new ConcurrentHashMap<>();
+
+    public ItemSelector(final Function<U, T> mapper)
+    {
+        keyMapper = mapper;
+    }
 
     public ItemSelector(final T... items)
     {
@@ -110,7 +113,7 @@ public class ItemSelector<T, U>
         }
         else
         {
-            final SelectorFilter selectorFilter = new SelectorFilter(sessionId);
+            final SelectorFilter selectorFilter = new SelectorFilter(sessionId, keyMapper);
 
             SESSION_MAP.put(sessionId, selectorFilter);
 
