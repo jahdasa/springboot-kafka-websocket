@@ -6,6 +6,7 @@ import com.ivanfranchin.bitcoinclient.selector.ItemSelector;
 import com.ivanfranchin.bitcoinclient.selector.ItemSelectorService;
 import com.ivanfranchin.bitcoinclient.kafka.price.PriceMessage;
 import com.ivanfranchin.bitcoinclient.kafka.price.PriceStream;
+import com.ivanfranchin.bitcoinclient.selector.Session;
 import com.ivanfranchin.bitcoinclient.websocket.AddIsinMessage;
 import com.ivanfranchin.bitcoinclient.websocket.RemoveIsinMessage;
 import jakarta.annotation.PostConstruct;
@@ -35,7 +36,7 @@ public class PriceController {
     private final ItemSelectorService itemSelectorService;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private ItemSelector priceSelector;
+    private ItemSelector<String> priceSelector;
 
     @PostConstruct
     public void postConstruct()
@@ -55,11 +56,10 @@ public class PriceController {
         final MessageHeaderAccessor accessor,
         @Header("simpSessionId") final String sessionId)
     {
-        final String userName = ((StompHeaderAccessor) accessor).getUser().getName();
+        final String username = ((StompHeaderAccessor) accessor).getUser().getName();
 
-        final Map<String, String> session = new HashMap<>();
-        session.put("sessionId", sessionId);
-        session.put("user", userName);
+        final Session session = priceSelector.getSessionOrNew(sessionId);
+        session.putMetadata("username", username);
 
         final List<String> isins = message.isins();
         if (!isins.isEmpty())
@@ -93,7 +93,7 @@ public class PriceController {
         @Header("simpSessionId") final String sessionId) {
         // Do some logic here when a subscription happens
 
-        final String userName = ((StompHeaderAccessor) accessor).getUser().getName();
+        final String username = ((StompHeaderAccessor) accessor).getUser().getName();
 
         final String isinsHeader = ((StompHeaderAccessor) accessor).getFirstNativeHeader("isins");
 
@@ -102,9 +102,8 @@ public class PriceController {
         try {
             final List<String> isins = mapper.readValue(isinsHeader, List.class);
 
-            final Map<String, String> session = new HashMap<>();
-            session.put("sessionId", sessionId);
-            session.put("user",userName);
+            final Session session = priceSelector.getSessionOrNew(sessionId);
+            session.putMetadata("username", username);
 
             priceSelector.select(sessionId, session, isins);
 

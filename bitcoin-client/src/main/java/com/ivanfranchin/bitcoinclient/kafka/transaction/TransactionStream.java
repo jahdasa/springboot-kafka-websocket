@@ -36,7 +36,7 @@ public class TransactionStream {
     @PostConstruct
     public void postConstruct()
     {
-        portfolioSelector = itemSelectorService.findSelectorOrNew("portfolio");
+        portfolioSelector = itemSelectorService.findSelectorOrNew("transaction");
     }
 
     @Bean
@@ -64,15 +64,12 @@ public class TransactionStream {
             portfolioSelector.getSessions(transactionMessage.portfolioId()).parallelStream()
                 .forEach(session ->
                 {
-                    final String sessionId = (String) session.get("sessionId");
-                    final String user =  (String) session.get("user");
-                    final Map<String, String> typeMap = (Map<String, String>) session.get("types");
-                    final Map<String, String> isinMap =  (Map<String, String>) session.get("isins");
+                    final String sessionId = session.getSessionId();
+                    final String user =  (String) session.getMetadata("username");
 
                     System.out.println("--> destination: /topic/transaction, user: " + user + ", sessionId: " + sessionId);
 
-                    if((typeMap.isEmpty() || typeMap.containsKey(transactionMessage.type())) &&
-                        (isinMap.isEmpty() || isinMap.containsKey(isinMap.get(transactionMessage.isin()))))
+                    if(session.apply(transactionMessage))
                     {
                         simpMessagingTemplate.convertAndSendToUser(
                                 sessionId,

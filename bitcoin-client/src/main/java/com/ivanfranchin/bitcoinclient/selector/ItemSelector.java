@@ -5,8 +5,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ItemSelector<T>
 {
-    private final Map<T, Map<String, Map<String, Object>>> ITEM_SESSION_MAP = new ConcurrentHashMap<>();
-    private final Map<String, Map<String, Object>> SESSION_MAP = new ConcurrentHashMap<>();
+    private final Map<T, Map<String, Session>> ITEM_SESSION_MAP = new ConcurrentHashMap<>();
+    private final Map<String, Session> SESSION_MAP = new ConcurrentHashMap<>();
 
     public ItemSelector(final T... items)
     {
@@ -28,7 +28,7 @@ public class ItemSelector<T>
         ITEM_SESSION_MAP.remove(item);
     }
 
-    public Collection<Map<String, Object>> getSessions(final T item)
+    public Collection<Session> getSessions(final T item)
     {
         return ITEM_SESSION_MAP.getOrDefault(item, Collections.emptyMap()).values();
     }
@@ -38,7 +38,7 @@ public class ItemSelector<T>
         return ITEM_SESSION_MAP.getOrDefault(item, Collections.emptyMap()).keySet();
     }
 
-    public void select(final String sessionId, final Map<String, Object> session, final List<T> items)
+    public void select(final String sessionId, final Session session, final List<T> items)
     {
         for (final T item: items)
         {
@@ -51,7 +51,7 @@ public class ItemSelector<T>
         }
     }
 
-    public void select(final String sessionId, final Map<String, Object> session, final T... items)
+    public void select(final String sessionId, final Session session, final T... items)
     {
         select(sessionId, session, Arrays.asList(items));
     }
@@ -82,7 +82,7 @@ public class ItemSelector<T>
         unselect(sessionId, Arrays.asList(items));
     }
 
-    public  Map<String, Object> getSessionOrNew(final String sessionId) {
+    public Session getSessionOrNew(final String sessionId) {
 
         if(SESSION_MAP.containsKey(sessionId))
         {
@@ -90,8 +90,7 @@ public class ItemSelector<T>
         }
         else
         {
-            final Map<String, Object> session = new ConcurrentHashMap<>();
-            session.put("sessionId", sessionId);
+            final Session session = new Session(sessionId);
 
             SESSION_MAP.put(sessionId, session);
 

@@ -60,8 +60,8 @@ public class PriceStream {
             priceSelector.getSessions(priceMessage.isin()).parallelStream()
                 .forEach(session ->
                 {
-                    final String sessionId = (String) session.get("sessionId");
-                    final String user = (String) session.get("user");
+                    final String sessionId = session.getSessionId();
+                    final String user =  (String) session.getMetadata("username");
 
                     System.out.println("--> destination: /topic/prices, user: " + user + ", sessionId: " + sessionId);
 
