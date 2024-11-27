@@ -2,6 +2,7 @@ package com.ivanfranchin.bitcoinclient.kafka.price;
 
 import com.ivanfranchin.bitcoinclient.selector.ItemSelector;
 import com.ivanfranchin.bitcoinclient.selector.ItemSelectorService;
+import com.ivanfranchin.bitcoinclient.selector.ItemSelectorStream;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +17,6 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -28,15 +26,16 @@ import java.util.function.Consumer;
 @Configuration
 public class PriceStream {
 
-    private final SimpMessagingTemplate simpMessagingTemplate;
     private final ItemSelectorService itemSelectorService;
 
+    private final ItemSelectorStream itemSelectorStream;
     private ItemSelector<String, PriceMessage> priceSelector;
+
 
     @PostConstruct
     public void postConstruct()
     {
-        priceSelector = itemSelectorService.findSelectorOrNew("price");
+        priceSelector = itemSelectorService.findSelectorOrNew("price", PriceMessage::isin);
     }
 
     @Bean
@@ -54,23 +53,7 @@ public class PriceStream {
                 messageHeaders.get(KafkaHeaders.OFFSET, Long.class),
                 messageHeaders.get(IntegrationMessageHeaderAccessor.DELIVERY_ATTEMPT, AtomicInteger.class));
 
-
-            priceSelector.getFilters(priceMessage.isin()).parallelStream()
-                .forEach(filter ->
-                {
-                    final String sessionId = filter.getSessionId();
-                    final String user =  (String) filter.getMetadata("username");
-
-                    System.out.println("--> destination: /topic/prices, user: " + user + ", sessionId: " + sessionId);
-
-                    simpMessagingTemplate.convertAndSendToUser(
-                        sessionId,
-                        "/topic/price",
-                        List.of(priceMessage),
-                        createHeaders(sessionId));
-                });
-
-            priceSelector.putData(priceMessage.isin(), priceMessage);
+            itemSelectorStream.send("/topic/price", priceMessage, priceSelector);
         };
     }
 

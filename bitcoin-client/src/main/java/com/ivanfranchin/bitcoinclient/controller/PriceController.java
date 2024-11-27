@@ -39,7 +39,7 @@ public class PriceController {
     @PostConstruct
     public void postConstruct()
     {
-        priceSelector = itemSelectorService.findSelectorOrNew("price");
+        priceSelector = itemSelectorService.findSelectorOrNew("price", PriceMessage::isin);
     }
 
     @GetMapping("/")

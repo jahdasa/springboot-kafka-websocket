@@ -4,13 +4,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 @Service
 public class ItemSelectorService
 {
     private final Map<String, ItemSelector> selectors = new ConcurrentHashMap<>();
 
-    public ItemSelector findSelectorOrNew(final String selector)
+    public <T,U> ItemSelector<T,U> findSelectorOrNew(final String selector, final Function<U, T> mapper)
     {
         if(selectors.containsKey(selector))
         {
@@ -18,8 +19,11 @@ public class ItemSelectorService
         }
         else
         {
-            final ItemSelector itemSelector = new ItemSelector();
+            final ItemSelector<T,U> itemSelector = new ItemSelector<>();
+            itemSelector.setKeyMapper(mapper);
+
             selectors.put(selector, itemSelector);
+
 
             return itemSelector;
         }

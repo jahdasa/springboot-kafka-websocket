@@ -38,7 +38,7 @@ public class TransactionController {
     @PostConstruct
     public void postConstruct()
     {
-        transactionSelector = itemSelectorService.findSelectorOrNew("transaction");
+        transactionSelector = itemSelectorService.findSelectorOrNew("transaction", TransactionMessage::portfolioId);
     }
 
     @MessageMapping("/transaction/add-items")

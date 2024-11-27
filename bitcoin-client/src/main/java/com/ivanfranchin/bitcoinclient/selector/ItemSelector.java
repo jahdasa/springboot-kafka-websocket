@@ -4,17 +4,30 @@ import com.ivanfranchin.bitcoinclient.kafka.transaction.TransactionMessage;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 public class ItemSelector<T, U>
 {
     private final Map<T, Map<String, SelectorFilter>> ITEM_SESSION_MAP = new ConcurrentHashMap<>();
     private final Map<String, SelectorFilter> SESSION_MAP = new ConcurrentHashMap<>();
 
+    private Function<U, T> keyMapper;
+
     public final Map<T, U> data = new ConcurrentHashMap<>();
 
     public ItemSelector(final T... items)
     {
         Arrays.stream(items).forEach(item -> ITEM_SESSION_MAP.put(item, new ConcurrentHashMap<>()));
+    }
+
+    public void setKeyMapper(final Function<U, T> mapper)
+    {
+        keyMapper = mapper;
+    }
+
+    public Function<U, T> getKeyMapper()
+    {
+        return keyMapper;
     }
 
     private boolean exists(final T item)
