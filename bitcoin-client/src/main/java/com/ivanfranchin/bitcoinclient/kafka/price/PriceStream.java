@@ -57,11 +57,11 @@ public class PriceStream {
                 messageHeaders.get(IntegrationMessageHeaderAccessor.DELIVERY_ATTEMPT, AtomicInteger.class));
 
 
-            priceSelector.getSessions(priceMessage.isin()).parallelStream()
-                .forEach(session ->
+            priceSelector.getFilters(priceMessage.isin()).parallelStream()
+                .forEach(filter ->
                 {
-                    final String sessionId = session.getSessionId();
-                    final String user =  (String) session.getMetadata("username");
+                    final String sessionId = filter.getSessionId();
+                    final String user =  (String) filter.getMetadata("username");
 
                     System.out.println("--> destination: /topic/prices, user: " + user + ", sessionId: " + sessionId);
 

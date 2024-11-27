@@ -1,6 +1,5 @@
 package com.ivanfranchin.bitcoinclient.selector;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,10 +9,16 @@ import java.util.function.Function;
 public class SelectorFilter
 {
     private String sessionId;
-    private String selectKey;
+
     private Map<String, Object> metadata = new ConcurrentHashMap<>();
     private Map<String, Object> fields = new ConcurrentHashMap<>();
     private Map<String, Object> fieldMappers = new ConcurrentHashMap<>();
+
+    private Object keyValues = new ConcurrentHashMap<>();
+    private Object keyMapper = Function.identity();
+
+    private Object latestRemovedKeyValues = List.of();
+
 
     public SelectorFilter(final String sessionId)
     {
@@ -34,6 +39,21 @@ public class SelectorFilter
     public Object getMetadata(final String key)
     {
         return metadata.get(key);
+    }
+
+    public <T, U> void putKeyValue(final List<T> values, final Function<U, T> mapper)
+    {
+        keyMapper = mapper;
+
+        if(keyValues == null)
+        {
+            keyValues = new ConcurrentHashMap<T,T>();
+        }
+
+        if(values != null && !values.isEmpty())
+        {
+            values.forEach(value -> ((Map<T,T>)keyValues).put(value, value));
+        }
     }
 
     public <T, U> void putFieldValue(final String field, final List<T> values, final Function<U, T> mapper)
@@ -71,6 +91,31 @@ public class SelectorFilter
         {
             values.forEach(value -> fieldValues.remove(value));
         }
+    }
+
+    public <T> void removeKeyValue(final List<T> values)
+    {
+        if(values != null && !values.isEmpty())
+        {
+            values.forEach(value -> ((Map<T, T>)keyValues).remove(value));
+        }
+
+        latestRemovedKeyValues = values;
+    }
+
+    public <T> Set<T> getKeyValues()
+    {
+        return ((Map<T, T>) keyValues).keySet();
+    }
+
+    public <T> List<T> getLatestRemovedKeyValues()
+    {
+        return (List<T> ) latestRemovedKeyValues;
+    }
+
+    public <U, T> Function<U, T> getKeyMapper()
+    {
+        return (Function<U, T>) keyMapper;
     }
 
     public <T, U> boolean apply(U message)

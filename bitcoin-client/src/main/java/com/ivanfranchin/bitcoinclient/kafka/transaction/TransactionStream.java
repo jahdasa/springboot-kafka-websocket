@@ -48,29 +48,29 @@ public class TransactionStream {
 
             log.info(
                 "TransactionMessage with id {}, portfolioId: {}, isin {}, type: {}, count: {}, price: {} value '{}' and timestamp '{}' received from bus. topic: {}, partition: {}, offset: {}, deliveryAttempt: {}",
-                    transactionMessage.id(),
-                    transactionMessage.portfolioId(),
-                    transactionMessage.isin() ,
-                    transactionMessage.type(),
-                    transactionMessage.count(),
-                     transactionMessage.price(),
-                     transactionMessage.value(),
-                    transactionMessage.timestamp(),
+                transactionMessage.id(),
+                transactionMessage.portfolioId(),
+                transactionMessage.isin() ,
+                transactionMessage.type(),
+                transactionMessage.count(),
+                transactionMessage.price(),
+                transactionMessage.value(),
+                transactionMessage.timestamp(),
 
                 messageHeaders.get(KafkaHeaders.RECEIVED_TOPIC, String.class),
                 messageHeaders.get(KafkaHeaders.RECEIVED_PARTITION, Integer.class),
                 messageHeaders.get(KafkaHeaders.OFFSET, Long.class),
                 messageHeaders.get(IntegrationMessageHeaderAccessor.DELIVERY_ATTEMPT, AtomicInteger.class));
 
-            portfolioSelector.getSessions(transactionMessage.portfolioId()).parallelStream()
-                .forEach(session ->
+            portfolioSelector.getFilters(transactionMessage.portfolioId()).parallelStream()
+                .forEach(filter ->
                 {
-                    final String sessionId = session.getSessionId();
-                    final String user =  (String) session.getMetadata("username");
+                    final String sessionId = filter.getSessionId();
+                    final String user =  (String) filter.getMetadata("username");
 
                     System.out.println("--> destination: /topic/transaction, user: " + user + ", sessionId: " + sessionId);
 
-                    if(session.apply(transactionMessage))
+                    if(filter.apply(transactionMessage))
                     {
                         simpMessagingTemplate.convertAndSendToUser(
                                 sessionId,

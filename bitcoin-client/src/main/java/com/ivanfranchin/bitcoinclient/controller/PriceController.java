@@ -59,7 +59,7 @@ public class PriceController {
         final SelectorFilter filter = priceSelector.getFilterOrNew(sessionId);
         filter.putMetadata("username", username);
 
-        filter.putFieldValue("isins", message.isins(), PriceMessage::isin);
+        filter.putKeyValue(message.isins(), PriceMessage::isin);
 
         final List<String> isins = message.isins();
         if (!isins.isEmpty())
@@ -85,11 +85,11 @@ public class PriceController {
 
         final SelectorFilter filter = priceSelector.getFilterOrNew(sessionId);
 
-        filter.removeFieldValue("isins", message.isins());
+        filter.removeKeyValue(message.isins());
 
         if (!isins.isEmpty())
         {
-            priceSelector.unselect(sessionId, isins);
+            priceSelector.unselect(sessionId, filter);
         }
     }
 
@@ -111,9 +111,8 @@ public class PriceController {
 
             final SelectorFilter filter = priceSelector.getFilterOrNew(sessionId);
             filter.putMetadata("username", username);
-            filter.putMetadata("selectorKey", "isins");
 
-            filter.putFieldValue("isins", isins, PriceMessage::isin);
+            filter.putKeyValue(isins, PriceMessage::isin);
 
             priceSelector.select(sessionId, filter);
 

@@ -53,7 +53,8 @@ public class TransactionController {
         final SelectorFilter filter = transactionSelector.getFilterOrNew(sessionId);
         filter.putMetadata("username", username);
 
-        filter.putFieldValue("portfolioIds", message.portfolioIds(), TransactionMessage::portfolioId);
+        filter.putKeyValue(message.portfolioIds(), TransactionMessage::portfolioId);
+
         filter.putFieldValue("types", message.types(), TransactionMessage::type);
         filter.putFieldValue("isins", message.isins(), TransactionMessage::isin);
 
@@ -78,7 +79,8 @@ public class TransactionController {
     {
         final SelectorFilter filter = transactionSelector.getFilterOrNew(sessionId);
 
-        filter.removeFieldValue("portfolioIds", message.portfolioIds());
+        filter.removeKeyValue(message.portfolioIds());
+
         filter.removeFieldValue("types", message.types());
         filter.removeFieldValue("isins", message.isins());
 
@@ -86,7 +88,7 @@ public class TransactionController {
         final List<Long> portfolioIds = message.portfolioIds();
         if (portfolioIds != null && !portfolioIds.isEmpty())
         {
-            transactionSelector.unselect(sessionId, portfolioIds);
+            transactionSelector.unselect(sessionId, filter);
         }
     }
 
@@ -112,9 +114,9 @@ public class TransactionController {
 
             final SelectorFilter filter = transactionSelector.getFilterOrNew(sessionId);
             filter.putMetadata("username", username);
-            filter.putMetadata("selectorKey", "portfolioIds");
 
-            filter.putFieldValue("portfolioIds", portfolioIds, TransactionMessage::portfolioId);
+            filter.putKeyValue(portfolioIds, TransactionMessage::portfolioId);
+
             filter.putFieldValue("types", types, TransactionMessage::type);
             filter.putFieldValue("isins", isins, TransactionMessage::isin);
 
@@ -132,13 +134,5 @@ public class TransactionController {
         }
 
         return transactions;
-    }
-
-    private MessageHeaders createHeaders(String sessionId)
-    {
-        final SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
-        headerAccessor.setSessionId(sessionId);
-        headerAccessor.setLeaveMutable(true);
-        return headerAccessor.getMessageHeaders();
     }
 }

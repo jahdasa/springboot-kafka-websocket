@@ -28,7 +28,7 @@ public class ItemSelector<T>
         ITEM_SESSION_MAP.remove(item);
     }
 
-    public Collection<SelectorFilter> getSessions(final T item)
+    public Collection<SelectorFilter> getFilters(final T item)
     {
         return ITEM_SESSION_MAP.getOrDefault(item, Collections.emptyMap()).values();
     }
@@ -40,10 +40,9 @@ public class ItemSelector<T>
 
     public void select(final String sessionId, final SelectorFilter filter)
     {
-        final String selectorKey = (String) filter.getMetadata("selectorKey");
-        Set<T> fieldValues = filter.getFieldValues(selectorKey);
+        Set<T> keyValues = filter.getKeyValues();
 
-        for (final T item: fieldValues)
+        for (final T item: keyValues)
         {
             if(!exists(item))
             {
@@ -54,8 +53,11 @@ public class ItemSelector<T>
         }
     }
 
-    public void unselect(final String sessionId, final List<T> items)
+    public void unselect(final String sessionId, final SelectorFilter filter)
     {
+        final Set<T> items = filter.getKeyValues();
+        final List<T> removedItems = filter.getLatestRemovedKeyValues();
+
         if(items.isEmpty())
         {
             ITEM_SESSION_MAP.entrySet().parallelStream()
@@ -65,7 +67,7 @@ public class ItemSelector<T>
         }
         else
         {
-            for(final T item : items)
+            for(final T item : removedItems)
             {
                 if(exists(item))
                 {
@@ -75,9 +77,12 @@ public class ItemSelector<T>
         }
     }
 
-    public void unselect(final String sessionId, final T... items)
+    public void unselect(final String sessionId)
     {
-        unselect(sessionId, Arrays.asList(items));
+        ITEM_SESSION_MAP.entrySet().parallelStream()
+                .forEach(entry -> entry.getValue().remove(sessionId));
+
+        SESSION_MAP.remove(sessionId);
     }
 
     public SelectorFilter getFilterOrNew(final String sessionId) {
