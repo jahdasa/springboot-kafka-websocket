@@ -56,6 +56,7 @@ public class TransactionStream {
                      transactionMessage.price(),
                      transactionMessage.value(),
                     transactionMessage.timestamp(),
+
                 messageHeaders.get(KafkaHeaders.RECEIVED_TOPIC, String.class),
                 messageHeaders.get(KafkaHeaders.RECEIVED_PARTITION, Integer.class),
                 messageHeaders.get(KafkaHeaders.OFFSET, Long.class),

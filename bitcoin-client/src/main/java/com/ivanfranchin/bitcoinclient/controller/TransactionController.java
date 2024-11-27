@@ -6,7 +6,7 @@ import com.ivanfranchin.bitcoinclient.kafka.transaction.TransactionMessage;
 import com.ivanfranchin.bitcoinclient.kafka.transaction.TransactionStream;
 import com.ivanfranchin.bitcoinclient.selector.ItemSelector;
 import com.ivanfranchin.bitcoinclient.selector.ItemSelectorService;
-import com.ivanfranchin.bitcoinclient.selector.Session;
+import com.ivanfranchin.bitcoinclient.selector.SelectorFilter;
 import com.ivanfranchin.bitcoinclient.websocket.AddPortfolioIdMessage;
 import com.ivanfranchin.bitcoinclient.websocket.RemovePortfolioIdMessage;
 import jakarta.annotation.PostConstruct;
@@ -25,8 +25,6 @@ import org.springframework.stereotype.Controller;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 @Controller
@@ -34,7 +32,6 @@ public class TransactionController {
 
     private final ItemSelectorService itemSelectorService;
     private final ObjectMapper mapper = new ObjectMapper();
-    private final Consumer transaction;
 
     private ItemSelector<Long> transactionSelector;
 
@@ -53,21 +50,21 @@ public class TransactionController {
     {
         final String username = ((StompHeaderAccessor) accessor).getUser().getName();
 
-        final Session session = transactionSelector.getSessionOrNew(sessionId);
-        session.putMetadata("username", username);
+        final SelectorFilter filter = transactionSelector.getFilterOrNew(sessionId);
+        filter.putMetadata("username", username);
 
-        session.putFieldValue("portfolioIds", message.portfolioIds(), TransactionMessage::portfolioId);
-        session.putFieldValue("types", message.types(), TransactionMessage::type);
-        session.putFieldValue("isins", message.isins(), TransactionMessage::isin);
+        filter.putFieldValue("portfolioIds", message.portfolioIds(), TransactionMessage::portfolioId);
+        filter.putFieldValue("types", message.types(), TransactionMessage::type);
+        filter.putFieldValue("isins", message.isins(), TransactionMessage::isin);
 
         if ( message.portfolioIds() != null && !message.portfolioIds().isEmpty())
         {
-            transactionSelector.select(sessionId, session, message.portfolioIds());
+            transactionSelector.select(sessionId, filter);
 
             return  message.portfolioIds().stream()
                     .filter(portfolioId -> TransactionStream.TRANSACTIONS.get(portfolioId) != null)
                     .map(portfolioId -> TransactionStream.TRANSACTIONS.get(portfolioId))
-                    .filter(transaction -> session.apply(transaction))
+                    .filter(transaction -> filter.apply(transaction))
                     .toList();
         }
 
@@ -79,11 +76,11 @@ public class TransactionController {
         @Payload final RemovePortfolioIdMessage message,
         @Header("simpSessionId") final String sessionId)
     {
-        final Session session = transactionSelector.getSessionOrNew(sessionId);
+        final SelectorFilter filter = transactionSelector.getFilterOrNew(sessionId);
 
-        session.removeFieldValue("portfolioIds", message.portfolioIds());
-        session.removeFieldValue("types", message.types());
-        session.removeFieldValue("isins", message.isins());
+        filter.removeFieldValue("portfolioIds", message.portfolioIds());
+        filter.removeFieldValue("types", message.types());
+        filter.removeFieldValue("isins", message.isins());
 
 
         final List<Long> portfolioIds = message.portfolioIds();
@@ -106,8 +103,6 @@ public class TransactionController {
         final String typesHeader = ((StompHeaderAccessor) accessor).getFirstNativeHeader("types");
         final String isinsHeader = ((StompHeaderAccessor) accessor).getFirstNativeHeader("isins");
 
-
-
         List<TransactionMessage> transactions = Collections.emptyList();
 
         try {
@@ -115,19 +110,20 @@ public class TransactionController {
             final List<String> types = typesHeader == null ? List.of() :  mapper.readValue(typesHeader, mapper.getTypeFactory().constructCollectionType(List.class, String.class));
             final List<String> isins = isinsHeader == null ? List.of() : mapper.readValue(isinsHeader, mapper.getTypeFactory().constructCollectionType(List.class, String.class));
 
-            final Session session = transactionSelector.getSessionOrNew(sessionId);
-            session.putMetadata("username", username);
+            final SelectorFilter filter = transactionSelector.getFilterOrNew(sessionId);
+            filter.putMetadata("username", username);
+            filter.putMetadata("selectorKey", "portfolioIds");
 
-            session.putFieldValue("portfolioIds", portfolioIds, TransactionMessage::portfolioId);
-            session.putFieldValue("types", types, TransactionMessage::type);
-            session.putFieldValue("isins", isins, TransactionMessage::isin);
+            filter.putFieldValue("portfolioIds", portfolioIds, TransactionMessage::portfolioId);
+            filter.putFieldValue("types", types, TransactionMessage::type);
+            filter.putFieldValue("isins", isins, TransactionMessage::isin);
 
-            transactionSelector.select(sessionId, session, portfolioIds);
+            transactionSelector.select(sessionId, filter);
 
             transactions = portfolioIds.stream()
                     .filter(portfolioId -> TransactionStream.TRANSACTIONS.get(portfolioId) != null)
                     .map(portfolioId -> TransactionStream.TRANSACTIONS.get(portfolioId))
-                    .filter(transaction -> session.apply(transaction))
+                    .filter(transaction -> filter.apply(transaction))
                     .toList();
 
         } catch (final JsonProcessingException e)

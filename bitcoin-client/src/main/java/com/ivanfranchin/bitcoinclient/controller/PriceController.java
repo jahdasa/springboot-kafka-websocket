@@ -6,7 +6,7 @@ import com.ivanfranchin.bitcoinclient.selector.ItemSelector;
 import com.ivanfranchin.bitcoinclient.selector.ItemSelectorService;
 import com.ivanfranchin.bitcoinclient.kafka.price.PriceMessage;
 import com.ivanfranchin.bitcoinclient.kafka.price.PriceStream;
-import com.ivanfranchin.bitcoinclient.selector.Session;
+import com.ivanfranchin.bitcoinclient.selector.SelectorFilter;
 import com.ivanfranchin.bitcoinclient.websocket.AddIsinMessage;
 import com.ivanfranchin.bitcoinclient.websocket.RemoveIsinMessage;
 import jakarta.annotation.PostConstruct;
@@ -25,9 +25,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @Controller
@@ -58,19 +56,24 @@ public class PriceController {
     {
         final String username = ((StompHeaderAccessor) accessor).getUser().getName();
 
-        final Session session = priceSelector.getSessionOrNew(sessionId);
-        session.putMetadata("username", username);
+        final SelectorFilter filter = priceSelector.getFilterOrNew(sessionId);
+        filter.putMetadata("username", username);
+
+        filter.putFieldValue("isins", message.isins(), PriceMessage::isin);
 
         final List<String> isins = message.isins();
         if (!isins.isEmpty())
         {
-            priceSelector.select(sessionId, session, isins);
+            priceSelector.select(sessionId, filter);
+
+            return isins.stream()
+                    .filter(isin -> PriceStream.PRICES.get(isin) != null)
+                    .map(isin -> PriceStream.PRICES.get(isin))
+                    .filter(price -> filter.apply(price))
+                    .toList();
         }
 
-        return isins.stream()
-                .filter(isin -> PriceStream.PRICES.get(isin) != null)
-                .map(isin -> PriceStream.PRICES.get(isin))
-                .toList();
+        return Collections.emptyList();
     }
 
     @MessageMapping("/price/remove-items")
@@ -78,8 +81,12 @@ public class PriceController {
         @Payload final RemoveIsinMessage message,
         @Header("simpSessionId") final String sessionId)
     {
-
         final List<String> isins = message.isins();
+
+        final SelectorFilter filter = priceSelector.getFilterOrNew(sessionId);
+
+        filter.removeFieldValue("isins", message.isins());
+
         if (!isins.isEmpty())
         {
             priceSelector.unselect(sessionId, isins);
@@ -102,14 +109,18 @@ public class PriceController {
         try {
             final List<String> isins = mapper.readValue(isinsHeader, List.class);
 
-            final Session session = priceSelector.getSessionOrNew(sessionId);
-            session.putMetadata("username", username);
+            final SelectorFilter filter = priceSelector.getFilterOrNew(sessionId);
+            filter.putMetadata("username", username);
+            filter.putMetadata("selectorKey", "isins");
 
-            priceSelector.select(sessionId, session, isins);
+            filter.putFieldValue("isins", isins, PriceMessage::isin);
+
+            priceSelector.select(sessionId, filter);
 
             prices = isins.stream()
                     .filter(isin -> PriceStream.PRICES.get(isin) != null)
                     .map(isin -> PriceStream.PRICES.get(isin))
+                    .filter(price -> filter.apply(price))
                     .toList();
 
         } catch (final JsonProcessingException e)

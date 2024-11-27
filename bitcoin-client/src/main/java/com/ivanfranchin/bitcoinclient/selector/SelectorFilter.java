@@ -1,18 +1,21 @@
 package com.ivanfranchin.bitcoinclient.selector;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-public class Session
+public class SelectorFilter
 {
     private String sessionId;
+    private String selectKey;
     private Map<String, Object> metadata = new ConcurrentHashMap<>();
     private Map<String, Object> fields = new ConcurrentHashMap<>();
     private Map<String, Object> fieldMappers = new ConcurrentHashMap<>();
 
-    public Session(final String sessionId)
+    public SelectorFilter(final String sessionId)
     {
         metadata.put("sessionId", sessionId);
         this.sessionId = sessionId;
@@ -33,7 +36,6 @@ public class Session
         return metadata.get(key);
     }
 
-
     public <T, U> void putFieldValue(final String field, final List<T> values, final Function<U, T> mapper)
     {
         final Map<T,T> fieldValues = (Map<T,T>) fields.getOrDefault(field, new ConcurrentHashMap<>());
@@ -48,6 +50,11 @@ public class Session
         {
             values.forEach(value -> fieldValues.put(value, value));
         }
+    }
+
+    public <T> Set<T> getFieldValues(final String field)
+    {
+        return ((Map<T, T>) fields.getOrDefault(field, new ConcurrentHashMap<>())).keySet();
     }
 
     public <T> void removeFieldValue(final String field, final List<T> values)
