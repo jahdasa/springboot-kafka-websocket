@@ -29,8 +29,6 @@ import java.util.function.Consumer;
 public class PriceStream {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
-    public static final Map<String, PriceMessage> PRICES = new ConcurrentHashMap<>();
-
     private final ItemSelectorService itemSelectorService;
 
     private ItemSelector<String, PriceMessage> priceSelector;
@@ -72,7 +70,7 @@ public class PriceStream {
                         createHeaders(sessionId));
                 });
 
-            PRICES.put(priceMessage.isin(), priceMessage);
+            priceSelector.putData(priceMessage.isin(), priceMessage);
         };
     }
 

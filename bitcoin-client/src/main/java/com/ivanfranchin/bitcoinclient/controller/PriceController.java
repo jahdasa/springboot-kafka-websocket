@@ -66,11 +66,7 @@ public class PriceController {
         {
             priceSelector.select(sessionId, filter);
 
-            return isins.stream()
-                    .filter(isin -> priceSelector.getData(isin) != null)
-                    .map(isin -> priceSelector.getData(isin))
-                    .filter(price -> filter.apply(price))
-                    .toList();
+            return priceSelector.getData(filter);
         }
 
         return Collections.emptyList();
@@ -116,25 +112,12 @@ public class PriceController {
 
             priceSelector.select(sessionId, filter);
 
-            prices = isins.stream()
-                    .filter(isin -> priceSelector.getData(isin) != null)
-                    .map(isin -> priceSelector.getData(isin))
-                    .filter(price -> filter.apply(price))
-                    .toList();
-
+            prices = priceSelector.getData(filter);
         } catch (final JsonProcessingException e)
         {
             System.out.println(e.getMessage());
         }
 
         return prices;
-    }
-
-    private MessageHeaders createHeaders(String sessionId)
-    {
-        final SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
-        headerAccessor.setSessionId(sessionId);
-        headerAccessor.setLeaveMutable(true);
-        return headerAccessor.getMessageHeaders();
     }
 }

@@ -119,4 +119,12 @@ public class ItemSelector<T, U>
     {
         return data.getOrDefault(key, defaultValue);
     }
+
+    public List<U> getData(final SelectorFilter filter) {
+        return filter.getKeyValues().stream()
+                .filter(keyValue -> data.get(keyValue) != null)
+                .map(keyValue -> data.get(keyValue))
+                .filter(data -> filter.apply(data))
+                .toList();
+    }
 }

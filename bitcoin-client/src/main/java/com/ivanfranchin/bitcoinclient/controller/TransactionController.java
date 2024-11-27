@@ -62,11 +62,7 @@ public class TransactionController {
         {
             transactionSelector.select(sessionId, filter);
 
-            return  message.portfolioIds().stream()
-                    .filter(portfolioId -> transactionSelector.getData(portfolioId) != null)
-                    .map(portfolioId -> transactionSelector.getData(portfolioId))
-                    .filter(transaction -> filter.apply(transaction))
-                    .toList();
+            return transactionSelector.getData(filter);
         }
 
         return Collections.emptyList();
@@ -122,11 +118,7 @@ public class TransactionController {
 
             transactionSelector.select(sessionId, filter);
 
-            transactions = portfolioIds.stream()
-                    .filter(portfolioId -> transactionSelector.getData(portfolioId) != null)
-                    .map(portfolioId -> transactionSelector.getData(portfolioId))
-                    .filter(transaction -> filter.apply(transaction))
-                    .toList();
+            transactions = transactionSelector.getData(filter);
 
         } catch (final JsonProcessingException e)
         {
