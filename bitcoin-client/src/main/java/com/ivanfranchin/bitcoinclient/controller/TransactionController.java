@@ -45,7 +45,7 @@ public class TransactionController {
         final MessageHeaderAccessor accessor,
         @Header("simpSessionId") final String sessionId)
     {
-        final String username = ((StompHeaderAccessor) accessor).getUser().getName();
+        final String username = "user1"; //((StompHeaderAccessor) accessor).getUser().getName();
 
         final SelectorFilter filter = transactionSelector.getFilterOrNew(sessionId);
         filter.putMetadata("username", username);
@@ -92,7 +92,7 @@ public class TransactionController {
         @Header("simpSessionId") final String sessionId) {
         // Do some logic here when a subscription happens
 
-        final String username = ((StompHeaderAccessor) accessor).getUser().getName();
+        final String username = "user1"; //((StompHeaderAccessor) accessor).getUser().getName();
 
         final String portfolioIdsHeader = ((StompHeaderAccessor) accessor).getFirstNativeHeader("portfolioIds");
         final String typesHeader = ((StompHeaderAccessor) accessor).getFirstNativeHeader("types");

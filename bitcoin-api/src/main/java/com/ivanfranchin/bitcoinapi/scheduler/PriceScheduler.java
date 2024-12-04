@@ -38,29 +38,35 @@ public class PriceScheduler {
             1L, 1271L
     );
 
-    @Scheduled(cron = "*/2 * * * * *") // every 2 seconds
+    @Scheduled(cron = "*/1 * * * * *") // every 2 seconds
     public void streamNewPrice() {
         if (hasTrade()) {
-            final String isin = numberToIsin.get(nextIsin());
-
-            Price price = priceService.getLastPrice(isin);
-            price = getNewPrice(isin, price.getValue());
-            priceService.savePrice(price);
-
-            final Long portfolioId = numberToPortfolioId.get(nextPortfolioId());
-
-            Transaction transaction = transactionService.getLastTransaction(portfolioId, isin);
-            transaction = getNewTransaction(transaction, price.getValue());
-            transactionService.saveTransaction(transaction);
-
-            priceStreamer.send(price);
-            transactionStreamer.send(transaction);
+            for (int i = 0; i < 10; i++) {
+                sendTrade();
+            }
 
         }
     }
 
+    private void sendTrade() {
+        final String isin = numberToIsin.get(nextIsin());
+
+        Price price = priceService.getLastPrice(isin);
+        price = getNewPrice(isin, price.getValue());
+        priceService.savePrice(price);
+
+        final Long portfolioId = numberToPortfolioId.get(nextPortfolioId());
+
+        Transaction transaction = transactionService.getLastTransaction(portfolioId, isin);
+        transaction = getNewTransaction(transaction, price.getValue());
+        transactionService.saveTransaction(transaction);
+
+        priceStreamer.send(price);
+        transactionStreamer.send(transaction);
+    }
+
     private boolean hasTrade() {
-        return rand.nextBoolean();
+        return true;//rand.nextBoolean();
     }
 
     private Long nextIsin() {

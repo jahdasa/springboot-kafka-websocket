@@ -1,5 +1,6 @@
 package com.ivanfranchin.bitcoinclient.selector;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,7 @@ public class ItemSelectorStream {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
 
+    @Timed(value = "ItemSelectorStream.send")
     public <T,U> void send(final String destination, final U message, final ItemSelector<T, U> itemSelector)
     {
         final T value = itemSelector.getKeyMapper().apply(message);

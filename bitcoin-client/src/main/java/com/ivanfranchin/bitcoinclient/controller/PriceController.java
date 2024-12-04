@@ -8,8 +8,10 @@ import com.ivanfranchin.bitcoinclient.kafka.price.PriceMessage;
 import com.ivanfranchin.bitcoinclient.selector.SelectorFilter;
 import com.ivanfranchin.bitcoinclient.websocket.AddIsinMessage;
 import com.ivanfranchin.bitcoinclient.websocket.RemoveIsinMessage;
+import io.micrometer.core.annotation.Timed;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Controller
 public class PriceController {
@@ -44,6 +47,7 @@ public class PriceController {
         return "prices";
     }
 
+    @Timed
     @MessageMapping("/price/add-filter")
     @SendToUser("/topic/price")
     public List<PriceMessage> addFilter(
@@ -51,13 +55,14 @@ public class PriceController {
         final MessageHeaderAccessor accessor,
         @Header("simpSessionId") final String sessionId)
     {
-        final String username = ((StompHeaderAccessor) accessor).getUser().getName();
+        final String username = "user1"; //((StompHeaderAccessor) accessor).getUser().getName();
 
         final SelectorFilter filter = priceSelector.getFilterOrNew(sessionId);
         filter.putMetadata("username", username);
 
         filter.putKeyValue(message.isins());
 
+        log.info("username: {}, add-filter: {}", username, message);
         final List<String> isins = message.isins();
         if (!isins.isEmpty())
         {
@@ -93,10 +98,13 @@ public class PriceController {
         @Header("simpSessionId") final String sessionId) {
         // Do some logic here when a subscription happens
 
-        final String username = ((StompHeaderAccessor) accessor).getUser().getName();
+        final String username = "user1"; //((StompHeaderAccessor) accessor).getUser().getName();
 
-        final String isinsHeader = ((StompHeaderAccessor) accessor).getFirstNativeHeader("isins");
-
+        String isinsHeader = ((StompHeaderAccessor) accessor).getFirstNativeHeader("isins");
+        if (isinsHeader == null)
+        {
+            isinsHeader = "[]";
+        }
         List<PriceMessage> prices = Collections.emptyList();
 
         try {

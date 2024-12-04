@@ -45,7 +45,7 @@ public class PriceStream {
             final PriceMessage priceMessage = message.getPayload();
             final MessageHeaders messageHeaders = message.getHeaders();
 
-            log.info(
+            log.debug(
                 "PriceMessage with id {}, isin {}, value '{}' and timestamp '{}' received from bus. topic: {}, partition: {}, offset: {}, deliveryAttempt: {}",
                 priceMessage.id(), priceMessage.isin() ,priceMessage.value(), priceMessage.timestamp(),
                 messageHeaders.get(KafkaHeaders.RECEIVED_TOPIC, String.class),

@@ -50,7 +50,10 @@ public class ItemSelector<T, U>
 
     public Collection<SelectorFilter> getFilters(final T item)
     {
-        return ITEM_SESSION_MAP.getOrDefault(item, Collections.emptyMap()).values();
+        final Collection<SelectorFilter> values = ITEM_SESSION_MAP.getOrDefault(item, Collections.emptyMap()).values();
+        System.out.println("item: " + item +", filter size: " + values.size());
+
+        return values;
     }
 
     public Set<String> getSessionIds(final T item)

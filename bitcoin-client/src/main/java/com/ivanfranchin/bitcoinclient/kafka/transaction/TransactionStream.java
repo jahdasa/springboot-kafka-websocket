@@ -41,7 +41,7 @@ public class TransactionStream {
             final TransactionMessage transactionMessage = message.getPayload();
             final MessageHeaders messageHeaders = message.getHeaders();
 
-            log.info(
+            log.debug(
                 "TransactionMessage with id {}, portfolioId: {}, isin {}, type: {}, count: {}, price: {} value '{}' and timestamp '{}' received from bus. topic: {}, partition: {}, offset: {}, deliveryAttempt: {}",
                 transactionMessage.id(),
                 transactionMessage.portfolioId(),
